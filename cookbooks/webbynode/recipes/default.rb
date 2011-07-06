@@ -32,6 +32,12 @@ cookbook_file '/var/apps/.gemrc' do
   mode '0644'
 end
 
+cookbook_file '/var/apps/.profile' do
+  source 'profile'
+  owner 'deploy'
+  mode '0644'
+end
+
 cookbook_file '/var/apps/.bashrc' do
   source 'bashrc'
   owner 'deploy'
