@@ -45,6 +45,13 @@ cookbook_file '/var/apps/.bashrc' do
   mode '0644'
 end
 
+template "/etc/sudoers" do
+  source "sudoers.erb"
+  mode 0440
+  owner "root"
+  group "root"
+end
+
 # --- Create the webbynode deployment structure ---
 
 directory '/var/webbynode'
