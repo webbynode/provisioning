@@ -1,0 +1,348 @@
+apt-get -q -y install curl
+
+sshpass='${rapid_app_password}'
+adduser git --disabled-password --home "${rapid_app_base_path}" --no-create-home -gecos "RemoteDeployer,,,"
+usermod -p `openssl passwd -1 -salt webbynode $sshpass` git
+echo "git ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+mkdir -p /var/webbynode
+mkdir -p /var/webbynode/mappings
+mkdir -p /var/webbynode/backups
+mkdir -p /var/webbynode/templates
+mkdir -p /var/webbynode/templates/rails
+mkdir -p "${rapid_app_base_path}"
+
+touch /root/.gitconfig
+git config --global receive.denyCurrentBranch ignore
+cp /root/.gitconfig ${rapid_app_base_path}
+
+path=$PATH
+if [[ "${ruby_version}" == "REE_1.8.7" ]]; then
+  path=$PATH:/opt/ruby-enterprise/bin
+fi
+
+echo "export PATH=$path"           >> ${rapid_app_base_path}/.bashrc
+echo "export RAILS_ENV=production" >> ${rapid_app_base_path}/.bashrc
+echo "gem: --no-ri --no-rdoc"      >> ${rapid_app_base_path}/.gemrc
+
+gem install astrails-safe
+
+dbengine="sqlite3"
+config_app_db=""
+
+if [ "${dep_mysqlserver}" = "yes" ]; then
+  # sets the dbengine
+  dbengine="mysql"
+
+  # saves the password
+  pass='${mysqlserver_password}'
+  
+  echo "#! /bin/bash
+# checks the db/username
+name=\$1
+name=\${name//[-._]/}
+
+if [ \${#name} -gt 15 ]; then
+  name=\$(echo \$name | cut -c1-15)
+fi
+
+# creates the app database
+mysqladmin -u root -p'$pass' create \$name
+
+# creates the app user
+echo \"CREATE USER \$name\"|mysql -u root -p'$pass' \$name
+echo \"GRANT ALL PRIVILEGES ON \$name.* TO '\$name'@'localhost' IDENTIFIED BY '$pass'; FLUSH PRIVILEGES;\" |mysql -u root -p'$pass' \$name" > /var/webbynode/config_app_db
+fi
+
+if  [ "${dep_postgresqlserver}" = "yes" ]; then
+  # sets the dbengine
+  dbengine="postgresql"
+  
+  # saves the password    
+	pass='${postgresqlserver_password}'
+	
+  echo "#! /bin/bash
+# checks the db/username
+name=\$1
+name=\${name//[-._]/}
+
+if [ \${#name} -gt 15 ]; then
+  name=\$(echo \$name | cut -c1-15)
+fi
+  
+# creates the app database
+sudo -u postgres createuser -S -d -R -E -e \$name
+sudo -u postgres psql -c \"ALTER USER \\\"\$name\\\" WITH ENCRYPTED PASSWORD '$pass';\"
+
+# creates the app user
+sudo -u postgres createdb \$name
+sudo -u postgres psql -d \$name -c \"GRANT ALL ON DATABASE \\\"\$name\\\" TO \\\"\$name\\\";\"
+" > /var/webbynode/config_app_db
+fi
+
+if [ "${dep_passengernginx}" = "yes" ]; then
+  webserver="nginx"
+  webserver_root="/opt/nginx"
+  webserver_initd="nginx"
+elif [ "${dep_railsnginx}" = "yes" ]; then
+  webserver="nginx"
+  webserver_root="/etc/nginx"
+  webserver_initd="nginx"
+else
+  webserver="Apache"
+  webserver_root="/etc/apache2"
+  webserver_initd="apache2"
+fi
+
+echo "#! /bin/bash
+
+dir=\`pwd\`
+cd /var/rails
+applist=\$(dir -d * 2>/dev/null)
+if [[ -z \$applist ]]; then
+  echo \"No applications found.\"
+else
+  for app in \$applist; do
+    cd /var/rails/\$app
+    if [ -f \".webbynode/settings\" ]; then
+      vars=\`cat .webbynode/settings\`  
+      eval \$vars
+    fi
+
+    if [ -z \"\$engine\" ]; then
+      if [[ -d \"app\" && -d \"app/controllers\" && -f \"config/environment.rb\" ]]; then
+        engine=\"rails\"
+      elif [ -f \"config.ru\" ]; then
+        engine=\"rack\"
+      else
+        engine=\"WARNING: Didn't detect what application engine you're using.\"
+      fi
+    fi
+  
+    last_change=\`git log --pretty=format:'%s (%an, %ar) - %h'|head -1\`
+    dns=\`tail -1 .pushand|cut -d \" \" -f 4\`
+
+    if [[ ! \"\$dns\" =~ \".\" ]]; then
+      dns=\"\$dns.webbyapp.com\"
+    fi
+
+    echo \"Application: \$app\"
+    echo \"        URL: http://\$dns\"
+    echo \"     Engine: \$engine\"
+    echo \"     Folder: \$(pwd)\"
+    echo \"Last change: \$last_change\"
+    echo \"\"
+  done
+fi
+cd \$dir
+" > /var/webbynode/list_apps
+
+echo "#! /bin/bash
+
+if [ -z \"\$1\" ]; then
+  echo \"Usage: delete_app [app_name]\"
+  exit
+fi
+
+app_name=\$1
+
+if [[ ! -d \"${rapid_app_base_path}/\$app_name\" ]]; then
+  echo \"Application \$app_name doesn't exit\"
+  exit
+fi
+
+if [[ \"\$2\" != \"--force\" ]]; then
+  echo \"This will delete your app \$app_name and restart $webserver.\"
+  read -n1 -p \"Are you sure? (y/n) \" 
+  echo \"\"
+
+  if [[ \$REPLY != [yY] ]]; then
+    echo \"Aborted.\"
+    exit
+  fi
+fi
+
+echo \"Deleting app at ${rapid_app_base_path}/\$app_name...\"
+cd ${rapid_app_base_path}/\$app_name
+rake db:drop
+app_dns=\$(cat /var/webbynode/mappings/\$app_name.conf)
+
+cd ${rapid_app_base_path}
+rm -fR \$app_name
+
+echo \"Removing vHost for \$app_name (\$app_dns)...\"
+cd $webserver_root/phd-sites
+rm \$app_dns
+rm /var/webbynode/mappings/\$app_name.conf
+
+if [[ -f \"/etc/cron.daily/\${app_name}_backup\" ]]; then
+  echo \"Removing backup cronjob...\"
+  sudo rm /etc/cron.daily/\${app_name}_backup
+
+  echo \"Deleting backup script...\"
+  rm /var/webbynode/backups/\${app_name}.rb
+fi
+
+echo \"Restarting $webserver...\"
+/etc/init.d/$webserver_initd restart > /dev/null 2>&1" > /var/webbynode/delete_app
+
+echo "#
+# auto generated by Webbynode Git Integration
+#
+
+development:
+  adapter: $dbengine
+  encoding: utf8
+  database: @app_name@
+  username: @app_name@
+  password: $pass
+
+test:
+  adapter: $dbengine
+  encoding: utf8
+  database: @app_name@
+  username: @app_name@
+  password: $pass
+
+production:
+  adapter: $dbengine
+  encoding: utf8
+  database: @app_name@
+  username: @app_name@
+  password: $pass" > /var/webbynode/templates/rails/database.yml
+
+if [ "${dep_postgresqlserver}" = "yes" ]; then
+  echo "  host: localhost
+  port: 5432"     >> /var/webbynode/templates/rails/database.yml
+fi
+
+echo "safe do
+  local :path => \"/var/webbynode/backups/archives/:id/:kind\"
+
+  s3 do
+    key \"@s3_key@\"
+    secret \"@s3_secret@\"
+    bucket \"webbynode_backups_${env_webbyname}\"
+    path \"backup/:id/:kind\"
+  end
+
+  keep do
+    local 7
+    s3 @retention@
+  end
+  
+  tar do
+    archive \"@app_name@\", :files => \"/var/rails/@app_name@\"
+  end" > /var/webbynode/templates/backup.rb
+
+if [ "${dep_postgresqlserver}" = "yes" ]; then
+  echo "
+  pgdump do
+    options \"-i -x -O\"
+
+    host \"127.0.0.1\"
+    user \"@app_name@\"
+    password \"$pass\"
+
+    database :@app_name@
+  end
+end
+" >> /var/webbynode/templates/backup.rb
+else
+  echo "
+  mysqldump do
+    options \"-ceKq --single-transaction --create-options\"
+
+    host \"localhost\"
+    user \"@app_name@\"
+    password \"$pass\"
+
+    database :@app_name@
+  end
+end
+" >> /var/webbynode/templates/backup.rb
+fi
+
+echo "#! /bin/bash
+#
+# Creates a new backup script for an application
+#
+# takes: app_name s3_key s3_secret [rentention]
+#
+
+app_name=\$1
+s3_key=\$2
+s3_secret=\$3
+retention=\$4
+
+test -z \"\$retention\"  && retention=30
+
+name=\$app_name
+name=\${name//[-._]/}
+
+if [ \${#name} -gt 15 ]; then
+  name=\$(echo \$name | cut -c1-15)
+fi
+
+echo \"Adding backup for \$app_name\"
+echo \"  => Configuring backup script with \$retention days retention...\" 
+
+target=/var/webbynode/backups/\$app_name.rb
+sed \"s/@app_name@/\$app_name/g\" /var/webbynode/templates/backup.rb > \$target
+sed -i \"s|@s3_key@|\$s3_key|g\" \$target
+sed -i \"s|@s3_secret@|\$s3_secret|g\" \$target
+sed -i \"s|@retention@|\$retention|g\" \$target
+
+echo \"#!/bin/bash
+PATH=\$PATH
+astrails-safe \$target >> /var/log/phd/backup.log 2>&1
+\" > /tmp/\${app_name}_backup
+
+echo \"  => Setting up a daily cron job...\" 
+sudo mv /tmp/\${app_name}_backup /etc/cron.daily
+sudo chmod +x /etc/cron.daily/\${app_name}_backup
+
+echo \"  => Executing first backup...\" 
+/etc/cron.daily/\${app_name}_backup
+
+echo \"\"
+echo \"  => Done!\" 
+" > /var/webbynode/config_app_backup
+
+chmod +x /var/webbynode/config_app_db
+ln -s /var/webbynode/config_app_db /usr/bin/config_app_db
+
+chmod +x /var/webbynode/config_app_backup
+ln -s /var/webbynode/config_app_backup /usr/bin/config_app_backup
+
+chmod +x /var/webbynode/delete_app
+ln -s /var/webbynode/delete_app /usr/bin/delete_app
+
+chmod +x /var/webbynode/list_apps
+ln -s /var/webbynode/list_apps /usr/bin/list_apps
+
+if [ ! "${dep_passengernginx}" = "yes" ]; then
+  cd /var/webbynode
+  git clone git://github.com/webbynode/phd.git
+  cd phd
+
+  git fetch origin
+  git branch --track stage origin/stage
+  git checkout stage
+
+  ./phd_server_setup
+  sudo ln -s /var/webbynode/phd/phd /usr/bin/phd
+  chown -R git:www-data /var/webbynode
+
+  # self update script
+  dir=`pwd`
+  cd /var/webbynode
+  wget http://repo.webbynode.com/rapidapps/update_rapp
+  chmod +x update_rapp
+  ln -s /var/webbynode/update_rapp /usr/bin/update_rapp
+  su - git update_rapp
+  cd $dir
+fi  
+
+chown -R git:www-data ${rapid_app_base_path}
+chown -R git:www-data /var/webbynode
