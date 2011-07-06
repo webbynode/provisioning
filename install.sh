@@ -3,7 +3,7 @@
 # This runs on the server
  
 ruby_binary=/usr/bin/ruby1.9.2
-chef_binary=/var/lib/gems/1.9.2/bin/chef-solo
+chef_binary=/usr/bin/chef-solo
 solo_rb=/root/solo.rb
 solo_json=/root/solo.json
 provisioning_folder=/root/provisioning
