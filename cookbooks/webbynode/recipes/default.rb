@@ -20,8 +20,12 @@ group 'deployers' do
   members ['deploy']
 end
 
-file '/var/apps/.gitconfig' do
-  content "[receive]\n	denyCurrentBranch = ignore"
+cookbook_file '/var/apps/.gitconfig' do
+  source 'gitconfig'
+end
+
+cookbook_file '/var/apps/.gemrc' do
+  source 'gemrc'
 end
 
 # --- Create the webbynode deployment structure ---
