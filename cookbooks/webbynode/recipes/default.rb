@@ -30,7 +30,7 @@ cookbook_file '/var/apps/.gemrc' do
   owner 'deploy'
 end
 
-file '/var/apps/.bashrc' do
+cookbook_file '/var/apps/.bashrc' do
   source 'bashrc'
   owner 'deploy'
 end
