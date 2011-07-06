@@ -23,16 +23,19 @@ end
 cookbook_file '/var/apps/.gitconfig' do
   source 'gitconfig'
   owner 'deploy'
+  mode '0644'
 end
 
 cookbook_file '/var/apps/.gemrc' do
   source 'gemrc'
   owner 'deploy'
+  mode '0644'
 end
 
 cookbook_file '/var/apps/.bashrc' do
   source 'bashrc'
   owner 'deploy'
+  mode '0644'
 end
 
 # --- Create the webbynode deployment structure ---
