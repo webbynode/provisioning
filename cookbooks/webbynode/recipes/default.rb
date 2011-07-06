@@ -22,6 +22,7 @@ end
 
 # --- Create the webbynode deployment structure ---
 
+directory '/var/webbynode'
 directory '/var/webbynode/mappings'
 directory '/var/webbynode/backups'
 directory '/var/webbynode/templates'
