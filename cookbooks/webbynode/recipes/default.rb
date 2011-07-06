@@ -1,6 +1,10 @@
 # --- Install packages we need ---
 package 'curl'
 package 'git-core'
+
+# --- Install the gems we need ---
+
+gem_package 'ruby-shadow'
  
 # --- Add the deployment user ---
 
