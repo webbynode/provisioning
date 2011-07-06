@@ -14,6 +14,7 @@ user 'deploy' do
   comment 'SSH based deployment user'
   home '/var/apps'
   password '$1$gdQZBxNP$jgWCYUfBF9fMXVO2jnpoh1'
+  shell '/bin/bash'
 end
 
 group 'deployers' do
