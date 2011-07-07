@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 
+cloud = false
 default['mysql']['bind_address']               = cloud ? cloud['local_ipv4'] : ipaddress
 default['mysql']['data_dir']                   = "/var/lib/mysql"
 
