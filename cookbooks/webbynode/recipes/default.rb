@@ -20,18 +20,23 @@ end
 
 # include_recipe "#{node[:database][:server]}::server"
 # include_recipe "#{node[:webserver][:id]}"
+include_recipe "nginx::default"
 
 case node[:database][:server]
 when 'mysql'
   package 'libmysqlclient-dev'
-  package 'mysql-server'
+  #package 'mysql-server'
   gem_package 'mysql'
+  
+  include_recipe 'mysql::server'
 when 'postgresql'
   package 'postgresql' 
   package 'postgresql-client' 
   package 'postgresql-doc' 
   package 'pgadmin3'
   gem_package 'pg'
+
+  include_recipe 'postgresql::server'
 end
 
 # --- Add the deployment user ---
@@ -80,7 +85,7 @@ directory "#{@home}/.ssh" do
 end
 
 template "#{@home}/.ssh/authorized_keys" do
-  source 'authorized_keys'
+  source 'authorized_keys.erb'
   owner 'deployer'
   mode '0644'
 end
