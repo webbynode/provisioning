@@ -21,7 +21,18 @@ end
 include_recipe "#{node[:database][:server]}::server"
 include_recipe "#{node[:webserver][:id]}"
 
-gem_package node[:database][:server]
+case node[:database][:server]
+when 'mysql'
+  package 'libmysqlclient-dev'
+  package 'mysql-server'
+  gem_package 'mysql'
+when 'postgresql'
+  package 'postgresql' 
+  package 'postgresql-client' 
+  package 'postgresql-doc' 
+  package 'pgadmin3'
+  gem_package 'pg'
+end
 
 # --- Add the deployment user ---
 
