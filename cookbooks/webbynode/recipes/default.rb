@@ -108,7 +108,7 @@ template "/etc/sudoers" do
   source "sudoers.erb"
   mode 0440
   owner "root"
-  group 'deployers'
+  group 'root'
 end
 
 # --- Create the webbynode deployment structure ---
