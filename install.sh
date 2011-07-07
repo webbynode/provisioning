@@ -29,7 +29,7 @@ fi
 
 if ! test -f "$chef_binary"; then
   aptitude install -y gcc
-  gem install --no-rdoc --no-ri chef --version 0.10.0
+  gem install --no-rdoc --no-ri chef --version 0.10.2
   gem install --no-rdoc --no-ri ruby-shadow
 fi
 
