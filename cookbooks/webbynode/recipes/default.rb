@@ -119,6 +119,12 @@ directory '/var/webbynode' do
   group 'deployers'
 end
 
+directory '/var/webbynode/vhosts' do
+  action :create
+  owner 'deploy'
+  group 'deployers'
+end
+
 directory '/var/webbynode/mappings' do
   action :create
   owner 'deploy'

@@ -11,7 +11,7 @@
 	  "id": "nginx",
 	  "name": "Nginx",
 	  "initd": "nginx",
-	  "root": "/opt/nginx"
+	  "root": "/etc/nginx"
 	},
 	"ssh": {
 	  "keys": [

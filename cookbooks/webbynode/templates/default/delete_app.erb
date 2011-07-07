@@ -34,7 +34,7 @@ cd <%= node[:deployer][:home] %>
 rm -fR $app_name
 
 echo "Removing vHost for $app_name ($app_dns)..."
-cd <%= node[:webserver][:root] %>/phd-sites
+cd /var/webbynode/vhosts
 rm $app_dns
 rm /var/webbynode/mappings/$app_name.conf
 
