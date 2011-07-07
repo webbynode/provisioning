@@ -141,7 +141,7 @@ end
 
 execute "phd_server_setup" do
   cwd "/var/webbynode/phd"
-  command "phd_server_setup"
+  command "./phd_server_setup"
   user "deploy"
   creates "/usr/bin/phd"
 end
