@@ -1,27 +1,12 @@
 #!/bin/bash
  
-# This runs on the server
- 
 ruby_binary=/usr/bin/ruby1.9.2
 chef_binary=/usr/bin/chef-solo
-solo_rb=/root/solo.rb
-solo_json=/root/solo.json
-provisioning_folder=/root/provisioning
+solo_rb=/var/webbynode/chef/solo.rb
+solo_json=/var/webbynode/chef/provision.json
+chef_folder=/var/webbynode/chef
+provisioning_folder=$chef_folder/chef/provisioning
 
-# if ! test -f "$solo_rb"; then
-#   echo "root = File.absolute_path(File.dirname(__FILE__))
-# 
-# file_cache_path root
-# cookbook_path root + '/cookbooks'" > $solo_rb
-# fi
-# 
-# if ! test -f "$solo_json"; then
-#   echo "{
-#     \"run_list\": [ \"recipe[webbynode::default]\" ]
-# }" > $solo_json
-# fi
- 
-# Are we on a vanilla system?
 if ! test -f "$ruby_binary"; then
     export DEBIAN_FRONTEND=noninteractive
 
@@ -49,11 +34,13 @@ if ! test -f "$chef_binary"; then
 fi
 
 if ! test -d "$provisioning_folder"; then
+  cd $chef_folder
   aptitude install -y git-core 
   git clone git://github.com/webbynode/provisioning.git
-  ln -s /root/provisioning/cookbooks /root/cookbooks
-  ln -s /root/provisioning/solo.json /root/solo.json
-  ln -s /root/provisioning/solo.rb /root/solo.rb
+  ln -s /$provisioning_folder/cookbooks /$chef_folder/cookbooks
+  ln -s /$provisioning_folder/provision.json /$chef_folder/provision.json
+  ln -s /$provisioning_folder/solo.rb /$chef_folder/solo.rb
 fi
  
-"$chef_binary" -c solo.rb -j solo.json
+cd $chef_folder
+"$chef_binary" -c solo.rb -j /$chef_folder/provision.json
