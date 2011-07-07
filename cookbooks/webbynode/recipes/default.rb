@@ -66,35 +66,41 @@ end
 cookbook_file "#{@home}/.gitconfig" do
   source 'gitconfig'
   owner 'deploy'
+  group 'deployers'
   mode '0644'
 end
 
 cookbook_file "#{@home}/.gemrc" do
   source 'gemrc'
   owner 'deploy'
+  group 'deployers'
   mode '0644'
 end
 
 cookbook_file "#{@home}/.profile" do
   source 'profile'
   owner 'deploy'
+  group 'deployers'
   mode '0644'
 end
 
 cookbook_file "#{@home}/.bashrc" do
   source 'bashrc'
   owner 'deploy'
+  group 'deployers'
   mode '0644'
 end
 
 directory "#{@home}/.ssh" do
   owner 'deploy'
+  group 'deployers'
   mode '0700'
 end
 
 template "#{@home}/.ssh/authorized_keys" do
   source 'authorized_keys.erb'
   owner 'deploy'
+  group 'deployers'
   mode '0644'
 end
 
@@ -102,7 +108,7 @@ template "/etc/sudoers" do
   source "sudoers.erb"
   mode 0440
   owner "root"
-  group "root"
+  group 'deployers'
 end
 
 # --- Create the webbynode deployment structure ---
@@ -110,49 +116,58 @@ end
 directory '/var/webbynode' do
   action :create
   owner 'deploy'
+  group 'deployers'
 end
 
 directory '/var/webbynode/mappings' do
   action :create
   owner 'deploy'
+  group 'deployers'
 end
 
 directory '/var/webbynode/backups' do
   action :create
   owner 'deploy'
+  group 'deployers'
 end
 
 directory '/var/webbynode/templates' do
   action :create
   owner 'deploy'
+  group 'deployers'
 end
 
 directory '/var/webbynode/templates/rails' do
   action :create
   owner 'deploy'
+  group 'deployers'
 end
 
 template "/var/webbynode/config_app_db" do
   source "config_app_db.#{node[:database][:server]}.erb"
   owner 'deploy'
+  group 'deployers'
   mode '0744'
 end
 
 template "/var/webbynode/delete_app" do
   source "delete_app.erb"
   owner 'deploy'
+  group 'deployers'
   mode '0744'
 end
 
 template "/var/webbynode/list_apps" do
   source "list_apps.erb"
   owner 'deploy'
+  group 'deployers'
   mode '0744'
 end
 
 template "/var/webbynode/templates/rails/database.yml" do
   source "database.yml.erb"
   owner 'deploy'
+  group 'deployers'
   mode '0644'
 end
 
@@ -160,6 +175,7 @@ end
 
 git "/var/webbynode/phd" do
   user 'deploy'
+  group 'deployers'
   repository "git://github.com/webbynode/phd.git"
   branch "webbynode2"
   action :sync
@@ -169,5 +185,6 @@ execute "phd_server_setup" do
   cwd "/var/webbynode/phd"
   command "./phd_server_setup"
   user "root"
+  group 'deployers'
   creates "/usr/bin/phd"
 end
