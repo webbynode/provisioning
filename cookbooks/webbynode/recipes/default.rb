@@ -134,6 +134,7 @@ end
 # --- Installs PHD ---
 
 git "/var/webbynode/phd" do
+  repository "git://github.com/webbynode/phd.git"
   branch "webbynode2"
   action :sync
 end
