@@ -47,15 +47,16 @@ end
 
 log ">>> HOME is: #{@home}"
 
-directory @home do
-  action :create
-end
-
 user 'deploy' do
   comment 'SSH based deployment user'
   home node[:deployer][:home]
   password node[:deployer][:password] # '$1$gdQZBxNP$jgWCYUfBF9fMXVO2jnpoh1'
   shell '/bin/bash'
+end
+
+directory @home do
+  action :create
+  owner 'deploy'
 end
 
 group 'deployers' do
