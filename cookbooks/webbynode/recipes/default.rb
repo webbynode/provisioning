@@ -137,6 +137,12 @@ end
 
 # --- Create the webbynode deployment structure ---
 
+directory '/var/webbynode/phd' do
+  action :create
+  owner 'deploy'
+  group 'deployers'
+end
+
 directory '/var/webbynode/log' do
   action :create
   owner 'deploy'
