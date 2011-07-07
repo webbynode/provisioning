@@ -1,24 +1,17 @@
-#
-# Cookbook Name:: nginx
-# Recipe:: default
-# Author:: AJ Christensen <aj@junglist.gen.nz>
-#
-# Copyright 2008-2009, Opscode, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+nginx_filename = ["nginx", node[:nginx][:version], node[:nginx][:architecture]].join("_")+".deb"
 
-package "nginx"
+package "libperl5.10"
+package "libgd2-noxpm"
+package "libxslt1.1"
+package "libgeoip1"
+
+dpkg_package "nginx" do
+  source "/home/system/pkg/debs/#{nginx_filename}"
+end
+
+service "nginx" do
+  supports :status => true, :restart => true, :reload => true
+end
 
 directory node[:nginx][:log_dir] do
   mode 0755
@@ -35,22 +28,37 @@ end
   end
 end
 
+cookbook_file "#{node[:nginx][:dir]}/mime.types"
+
 template "nginx.conf" do
   path "#{node[:nginx][:dir]}/nginx.conf"
   source "nginx.conf.erb"
   owner "root"
   group "root"
   mode 0644
+  notifies :reload, resources(:service => "nginx")
 end
 
-template "#{node[:nginx][:dir]}/sites-available/default" do
-  source "default-site.erb"
-  owner "root"
-  group "root"
-  mode 0644
+directory "/etc/nginx/helpers"
+
+# helpers to be included in your vhosts
+node[:nginx][:helpers].each do |h|
+  template "/etc/nginx/helpers/#{h}.conf" do
+    notifies :reload, resources(:service => "nginx")
+  end
 end
+
+# server-wide defaults, automatically loaded
+node[:nginx][:extras].each do |ex|
+  template "/etc/nginx/conf.d/#{ex}.conf" do
+    notifies :reload, resources(:service => "nginx")
+  end
+end  
 
 service "nginx" do
-  supports :status => true, :restart => true, :reload => true
   action [ :enable, :start ]
+end
+
+nginx_site "default" do
+  enable false
 end
