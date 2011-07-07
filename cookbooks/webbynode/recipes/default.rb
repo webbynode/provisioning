@@ -131,3 +131,22 @@ template "/var/webbynode/templates/rails/database.yml" do
   mode '0644'
 end
 
+# --- Installs PHD ---
+
+cd /var/webbynode
+git clone git://github.com/webbynode/phd.git
+cd phd
+
+git "/var/webbynode/phd" do
+  branch "webbynode2"
+  action :sync
+end
+
+execute "phd_server_setup" do
+  cwd "/var/webbynode/phd"
+  command "phd_server_setup"
+  user "deploy"
+  creates "/usr/bin/phd"
+end
+
+
