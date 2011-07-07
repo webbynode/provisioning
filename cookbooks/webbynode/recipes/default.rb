@@ -143,6 +143,15 @@ directory '/var/webbynode/templates/rails' do
   group 'deployers'
 end
 
+template "/var/webbynode/templates/rails/database.yml" do
+  source "database.yml.erb"
+  owner 'deploy'
+  group 'deployers'
+  mode '0644'
+end
+
+# --- Webbynode application management scripts ---
+
 template "/var/webbynode/config_app_db" do
   source "config_app_db.#{node[:database][:server]}.erb"
   owner 'deploy'
@@ -164,11 +173,22 @@ template "/var/webbynode/list_apps" do
   mode '0744'
 end
 
-template "/var/webbynode/templates/rails/database.yml" do
-  source "database.yml.erb"
+link '/usr/bin/config_app_db' do
+  to '/var/webbynode/config_app_db'
   owner 'deploy'
   group 'deployers'
-  mode '0644'
+end
+
+link '/usr/bin/delete_app' do
+  to '/var/webbynode/delete_app'
+  owner 'deploy'
+  group 'deployers'
+end
+
+link '/usr/bin/list_apps' do
+  to '/var/webbynode/list_apps'
+  owner 'deploy'
+  group 'deployers'
 end
 
 # --- Installs PHD ---
