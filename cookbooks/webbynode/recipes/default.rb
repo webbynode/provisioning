@@ -18,8 +18,8 @@ end
 
 # --- Installs the database and web server ---
 
-include_recipe "#{node[:database][:server]}::server"
-include_recipe "#{node[:webserver][:id]}"
+# include_recipe "#{node[:database][:server]}::server"
+# include_recipe "#{node[:webserver][:id]}"
 
 case node[:database][:server]
 when 'mysql'
