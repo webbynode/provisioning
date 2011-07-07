@@ -87,6 +87,7 @@ cookbook_file "#{@home}/.bashrc" do
 end
 
 directory "#{@home}/.ssh" do
+  owner 'deploy'
   mode '0700'
 end
 
