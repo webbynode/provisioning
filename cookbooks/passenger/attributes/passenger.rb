@@ -1,6 +1,6 @@
-default.passenger[:version] = '2.2.9'
-default.passenger[:nginx][:passenger_version] = "2.9.1"
-default.passenger[:nginx][:nginx_version] = "0.8.32"
+default.passenger[:version] = '3.0.7'
+default.passenger[:nginx][:passenger_version] = "3.0.7"
+default.passenger[:nginx][:nginx_version] = "1.0.4"
 
 default.passenger[:root_path]        = "#{node[:languages][:ruby][:gems_dir]}/gems/passenger-#{passenger[:version]}"
 default.passenger[:enterprise_root_path] = "#{node[:languages][:ruby][:gems_dir]}/gems/passenger-enterprise-server-#{passenger[:nginx][:passenger_version]}"
