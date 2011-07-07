@@ -1,2 +1,2 @@
 [receive]
-	denyCurrentBranch = ignoreroot
+	denyCurrentBranch = ignore
