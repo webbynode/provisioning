@@ -5,7 +5,7 @@ chef_binary=/usr/bin/chef-solo
 solo_rb=/var/webbynode/chef/solo.rb
 solo_json=/var/webbynode/chef/provision.json
 chef_folder=/var/webbynode/chef
-provisioning_folder=$chef_folder/chef/provisioning
+provisioning_folder=$chef_folder/provisioning
 
 if ! test -f "$ruby_binary"; then
     export DEBIAN_FRONTEND=noninteractive
@@ -34,12 +34,14 @@ if ! test -f "$chef_binary"; then
 fi
 
 if ! test -d "$provisioning_folder"; then
+  mkdir -p $chef_folder
+
   cd $chef_folder
   aptitude install -y git-core 
   git clone git://github.com/webbynode/provisioning.git
-  ln -s /$provisioning_folder/cookbooks /$chef_folder/cookbooks
-  ln -s /$provisioning_folder/provision.json /$chef_folder/provision.json
-  ln -s /$provisioning_folder/solo.rb /$chef_folder/solo.rb
+  ln -s $provisioning_folder/cookbooks /$chef_folder/cookbooks
+  ln -s $provisioning_folder/provision.json /$chef_folder/provision.json
+  ln -s $provisioning_folder/solo.rb /$chef_folder/solo.rb
 fi
  
 cd $chef_folder
