@@ -45,7 +45,11 @@ end
 
 @home = node[:deployer][:home]
 
-directory @home
+log ">>> HOME is: #{@home}"
+
+directory @home do
+  action :create
+end
 
 user 'deploy' do
   comment 'SSH based deployment user'
