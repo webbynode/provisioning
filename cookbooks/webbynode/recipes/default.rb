@@ -133,10 +133,6 @@ end
 
 # --- Installs PHD ---
 
-cd /var/webbynode
-git clone git://github.com/webbynode/phd.git
-cd phd
-
 git "/var/webbynode/phd" do
   branch "webbynode2"
   action :sync
