@@ -1,0 +1,15 @@
+#! /bin/bash
+# checks the db/username
+name=$1
+name=${name//[-._]/}
+
+if [ ${#name} -gt 15 ]; then
+  name=$(echo $name | cut -c1-15)
+fi
+
+# creates the app database
+mysqladmin -u root -p'<%= node[:database][:password] %>' create $name
+
+# creates the app user
+echo "CREATE USER $name"|mysql -u root -p'<%= node[:database][:password] %>' $name
+echo "GRANT ALL PRIVILEGES ON $name.* TO '$name'@'localhost' IDENTIFIED BY '<%= node[:database][:password] %>'; FLUSH PRIVILEGES;"|mysql -u root -p'<%= node[:database][:password] %>' $name

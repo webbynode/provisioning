@@ -1,0 +1,56 @@
+#! /bin/bash
+
+if [ -z "$1" ]; then
+  echo "Usage: delete_app [app_name]"
+  exit
+fi
+
+app_name=$1
+
+if [[ ! -d "<%= node[:deployer][:home] %>/$app_name" ]]; then
+  echo "Application $app_name doesn't exit"
+  exit
+fi
+
+if [[ "$2" != "--force" ]]; then
+  echo "This will delete your app $app_name and restart nginx."
+  read -n1 -p "Are you sure? (y/n) " 
+  echo ""
+
+  if [[ $REPLY != [yY] ]]; then
+    echo "Aborted."
+    exit
+  fi
+fi
+
+echo "Deleting app at <%= node[:deployer][:home] %>/$app_name..."
+cd <%= node[:deployer][:home] %>/$app_name
+if [ $(rake -T 2>/dev/null|grep db:drop|wc -l) -gt 0 ]; then
+  rake db:drop > /var/log/phd/db_drop.log 2>&1
+fi
+app_dns=$(cat /var/webbynode/mappings/$app_name.conf)
+
+cd <%= node[:deployer][:home] %>
+rm -fR $app_name
+
+echo "Removing vHost for $app_name ($app_dns)..."
+cd <%= node[:webserver][:root] %>/phd-sites
+rm $app_dns
+rm /var/webbynode/mappings/$app_name.conf
+
+if [[ -f "/etc/cron.daily/${app_name}_backup" ]]; then
+  echo "Removing backup cronjob..."
+  sudo rm /etc/cron.daily/${app_name}_backup
+
+  echo "Deleting backup script..."
+  rm /var/webbynode/backups/${app_name}.rb
+fi
+
+if [[ -f "/var/webbynode/hooks/delete/${app_name}" ]]; then
+  echo "Executing deletion hooks..."
+  bash /var/webbynode/hooks/delete/${app_name}
+  rm /var/webbynode/hooks/delete/${app_name}
+fi
+
+echo "Restarting <%= node[:webserver][:name] %>..."
+/etc/init.d/<%= node[:webserver][:initd] %> restart > /dev/null 2>&1

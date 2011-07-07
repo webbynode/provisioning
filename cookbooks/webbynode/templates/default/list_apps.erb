@@ -1,0 +1,48 @@
+#! /bin/bash
+
+dir=`pwd`
+cd <%= node[:deployer][:home] %>
+applist=$(dir -d * 2>/dev/null)
+app_exists=n
+if [[ ! -z $applist ]]; then
+  for app in $applist; do
+    unset engine
+    
+    cd <%= node[:deployer][:home] %>$app
+
+    if [ -d ".webbynode" ]; then
+      app_exists=y
+      
+      if [ -f ".webbynode/settings" ]; then
+        vars=`cat .webbynode/settings`  
+        eval $vars
+      fi
+
+      if [ -z "$engine" ]; then
+        if [[ -d "app" && -d "app/controllers" && -f "config/environment.rb" ]]; then
+          engine="rails"
+        elif [ -f "config.ru" ]; then
+          engine="rack"
+        else
+          engine="WARNING: Didn't detect what application engine you're using."
+        fi
+      fi
+  
+      last_change=`git log --pretty=format:'%s (%an, %ar) - %h'|head -1`
+      dns=$(cat /var/webbynode/mappings/$app.conf 2>/dev/null)
+
+      echo "Application: $app"
+      if [ ! -z $dns ]; then
+        echo "        URL: http://$dns"
+      fi
+      echo "     Engine: $engine"
+      echo "     Folder: $(pwd)"
+      echo "Last change: $last_change"
+      echo ""
+    fi
+  done
+fi
+if [[ $app_exists == "n" ]]; then
+  echo "No applications found."
+fi
+cd $dir

@@ -1,0 +1,16 @@
+#! /bin/bash
+# checks the db/username
+name=$1
+name=${name//[-._]/}
+
+if [ ${#name} -gt 15 ]; then
+  name=$(echo $name | cut -c1-15)
+fi
+
+# creates the app database
+sudo -u postgres createuser -S -d -R -E -e $name
+sudo -u postgres psql -c "ALTER USER \"$name\" WITH ENCRYPTED PASSWORD '<%= node[:database][:password] %>';"
+
+# creates the app user
+sudo -u postgres createdb $name
+sudo -u postgres psql -d $name -c "GRANT ALL ON DATABASE \"$name\" TO \"$name\";"
