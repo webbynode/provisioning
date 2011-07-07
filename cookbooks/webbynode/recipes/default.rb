@@ -28,7 +28,7 @@ when 'mysql'
   #package 'mysql-server'
   gem_package 'mysql'
   
-  include_recipe 'mysql::server'
+  # include_recipe 'mysql::server'
 when 'postgresql'
   package 'postgresql' 
   package 'postgresql-client' 
@@ -36,7 +36,7 @@ when 'postgresql'
   package 'pgadmin3'
   gem_package 'pg'
 
-  include_recipe 'postgresql::server'
+  # include_recipe 'postgresql::server'
 end
 
 # --- Add the deployment user ---
