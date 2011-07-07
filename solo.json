@@ -1,0 +1,16 @@
+{
+	"deployer": {
+		"home": "/var/apps",
+		"password": "$1$gdQZBxNP$jgWCYUfBF9fMXVO2jnpoh1"
+	},
+	"database": {
+	  "server": "mysql",
+	  "password": "tempra13"
+	},
+	"webserver": {
+	  "name": "Nginx",
+	  "initd": "nginx",
+	  "root": "/opt/nginx"
+	},
+  "run_list": [ "recipe[webbynode::default]" ]
+}
