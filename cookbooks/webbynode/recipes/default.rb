@@ -72,7 +72,7 @@ template "/var/webbynode/delete_app" do
 end
 
 template "/var/webbynode/list_apps" do
-  source "delete_app.erb"
+  source "list_apps.erb"
   owner 'deploy'
   mode '0744'
 end
