@@ -21,6 +21,8 @@ end
 include_recipe "#{node[:database][:server]}::server"
 include_recipe "#{node[:webserver][:id]}"
 
+gem_package node[:database][:server]
+
 # --- Add the deployment user ---
 
 @home = node[:deployer][:home]
