@@ -111,9 +111,33 @@ template "/etc/sudoers" do
   group 'root'
 end
 
-# --- Create the webbynode deployment structure ---
+# --- Installs PHD ---
 
 directory '/var/webbynode' do
+  action :create
+  owner 'deploy'
+  group 'deployers'
+end
+
+git "/var/webbynode/phd" do
+  user 'deploy'
+  group 'deployers'
+  repository "git://github.com/webbynode/phd.git"
+  branch "webbynode2"
+  action :sync
+end
+
+execute "phd_server_setup" do
+  cwd "/var/webbynode/phd"
+  command "./phd_server_setup"
+  user "root"
+  group 'deployers'
+  creates "/usr/bin/phd"
+end
+
+# --- Create the webbynode deployment structure ---
+
+directory '/var/webbynode/log' do
   action :create
   owner 'deploy'
   group 'deployers'
@@ -197,20 +221,4 @@ link '/usr/bin/list_apps' do
   group 'deployers'
 end
 
-# --- Installs PHD ---
 
-git "/var/webbynode/phd" do
-  user 'deploy'
-  group 'deployers'
-  repository "git://github.com/webbynode/phd.git"
-  branch "webbynode2"
-  action :sync
-end
-
-execute "phd_server_setup" do
-  cwd "/var/webbynode/phd"
-  command "./phd_server_setup"
-  user "root"
-  group 'deployers'
-  creates "/usr/bin/phd"
-end
