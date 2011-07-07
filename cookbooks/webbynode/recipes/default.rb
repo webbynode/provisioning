@@ -60,7 +60,7 @@ directory '/var/webbynode/templates'
 directory '/var/webbynode/templates/rails'
 
 template "/var/webbynode/config_app_db" do
-  source "config_app_db.<%= node[:database][:server] %>.erb"
+  source "config_app_db.#{node[:database][:server]}.erb"
   owner 'deploy'
   mode '0744'
 end
