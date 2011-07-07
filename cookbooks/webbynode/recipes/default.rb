@@ -2,7 +2,25 @@
 
 package 'curl'
 package 'git-core'
- 
+package 'python-software-properties'
+
+# --- Add some PPAs ---
+
+if platform?(%w{debian ubuntu})
+  execute "add-apt-repository ppa:nginx/stable"  do
+    action :nothing
+  end
+  
+  execute "apt-get update" do
+    action :nothing
+  end  
+end
+
+# --- Installs the database and web server ---
+
+include_recipe "#{node[:database][:server]}::server"
+include_recipe "#{node[:webserver][:id]}"
+
 # --- Add the deployment user ---
 
 @home = node[:deployer][:home]
@@ -41,6 +59,16 @@ end
 cookbook_file "#{@home}/.bashrc" do
   source 'bashrc'
   owner 'deploy'
+  mode '0644'
+end
+
+directory "#{@home}/.ssh" do
+  mode '0700'
+end
+
+template "#{@home}/.ssh/authorized_keys" do
+  source 'authorized_keys'
+  owner 'deployer'
   mode '0644'
 end
 
