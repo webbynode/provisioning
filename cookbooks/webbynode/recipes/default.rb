@@ -86,7 +86,7 @@ end
 
 template "#{@home}/.ssh/authorized_keys" do
   source 'authorized_keys.erb'
-  owner 'deployer'
+  owner 'deploy'
   mode '0644'
 end
 
