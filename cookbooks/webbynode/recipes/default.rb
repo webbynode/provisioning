@@ -1,6 +1,7 @@
 # --- Install packages we need ---
 
 package 'curl'
+package 'libcurl4-openssl-dev'
 package 'git-core'
 package 'python-software-properties'
 
@@ -20,7 +21,7 @@ end
 
 # include_recipe "#{node[:database][:server]}::server"
 # include_recipe "#{node[:webserver][:id]}"
-include_recipe "nginx::default"
+include_recipe "passenger::nginx"
 
 case node[:database][:server]
 when 'mysql'
@@ -38,7 +39,6 @@ when 'postgresql'
   package 'pgadmin3'
   gem_package 'pg'
 
-  # include_recipe 'postgresql::server'
 end
 
 # --- Add the deployment user ---
