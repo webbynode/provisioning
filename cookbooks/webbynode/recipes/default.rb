@@ -24,11 +24,13 @@ include_recipe "nginx::default"
 
 case node[:database][:server]
 when 'mysql'
+  include_recipe 'mysql::server'
+
   package 'libmysqlclient-dev'
-  #package 'mysql-server'
-  gem_package 'mysql'
+  gem_package 'mysql' do
+    action :install
+  end
   
-  # include_recipe 'mysql::server'
 when 'postgresql'
   package 'postgresql' 
   package 'postgresql-client' 

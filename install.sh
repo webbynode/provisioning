@@ -39,6 +39,7 @@ if ! test -f "$ruby_binary"; then
                         --slave   /usr/bin/rdoc rdoc /usr/bin/rdoc1.9.2
                         
     gem update --system
+    cd -
 fi
 
 if ! test -f "$chef_binary"; then
