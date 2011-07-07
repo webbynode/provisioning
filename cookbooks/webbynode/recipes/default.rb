@@ -107,11 +107,30 @@ end
 
 # --- Create the webbynode deployment structure ---
 
-directory '/var/webbynode'
-directory '/var/webbynode/mappings'
-directory '/var/webbynode/backups'
-directory '/var/webbynode/templates'
-directory '/var/webbynode/templates/rails'
+directory '/var/webbynode' do
+  action :create
+  owner 'deploy'
+end
+
+directory '/var/webbynode/mappings' do
+  action :create
+  owner 'deploy'
+end
+
+directory '/var/webbynode/backups' do
+  action :create
+  owner 'deploy'
+end
+
+directory '/var/webbynode/templates' do
+  action :create
+  owner 'deploy'
+end
+
+directory '/var/webbynode/templates/rails' do
+  action :create
+  owner 'deploy'
+end
 
 template "/var/webbynode/config_app_db" do
   source "config_app_db.#{node[:database][:server]}.erb"
@@ -140,6 +159,7 @@ end
 # --- Installs PHD ---
 
 git "/var/webbynode/phd" do
+  user 'deploy'
   repository "git://github.com/webbynode/phd.git"
   branch "webbynode2"
   action :sync
@@ -151,5 +171,3 @@ execute "phd_server_setup" do
   user "root"
   creates "/usr/bin/phd"
 end
-
-
