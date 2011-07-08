@@ -5,9 +5,9 @@ package "libgd2-noxpm"
 package "libxslt1.1"
 package "libgeoip1"
 
-dpkg_package "nginx" do
-  source "/home/system/pkg/debs/#{nginx_filename}"
-end
+# dpkg_package "nginx" do
+#   source "/home/system/pkg/debs/#{nginx_filename}"
+# end
 
 service "nginx" do
   supports :status => true, :restart => true, :reload => true

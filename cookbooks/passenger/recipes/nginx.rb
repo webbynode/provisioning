@@ -12,7 +12,7 @@ package "libssl-dev"
 
 nginx_path = "/tmp/nginx-#{node[:passenger][:nginx][:nginx_version]}"
 
-remote_file nginx_path + ".tar.gz" do
+remote_file "#{nginx_path}.tar.gz" do
   cookbook "nginx"
   source "http://nginx.org/download/nginx-#{node[:passenger][:nginx][:nginx_version]}.tar.gz"
 end
