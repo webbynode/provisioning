@@ -12,9 +12,7 @@ if platform?(%w{debian ubuntu})
     action :nothing
   end
   
-  execute "apt-get update" do
-    action :nothing
-  end  
+  execute "apt-get update"
 end
 
 # --- Installs the database and web server ---

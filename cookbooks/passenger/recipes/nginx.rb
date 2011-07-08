@@ -9,6 +9,8 @@ package "libxslt1-dev"
 package "libpcre3-dev"
 package "libgd2-noxpm-dev"
 package "libssl-dev"
+package "build-essential"
+package "zlib1g-dev"
 
 nginx_path = "/tmp/nginx-#{node[:passenger][:nginx][:nginx_version]}"
 
