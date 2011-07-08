@@ -7,6 +7,8 @@ solo_json=/var/webbynode/chef/provision.json
 chef_folder=/var/webbynode/chef
 provisioning_folder=$chef_folder/provisioning
 
+apt-get update
+
 if ! test -f "$ruby_binary"; then
     export DEBIAN_FRONTEND=noninteractive
 
