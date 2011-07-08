@@ -8,7 +8,7 @@ if [[ ! -z $applist ]]; then
   for app in $applist; do
     unset engine
     
-    cd <%= node[:deployer][:home] %>$app
+    cd <%= node[:deployer][:home] %>/$app
 
     if [ -d ".webbynode" ]; then
       app_exists=y
