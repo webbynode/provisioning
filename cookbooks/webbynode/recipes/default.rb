@@ -184,6 +184,13 @@ template "/var/webbynode/templates/rails/database.yml" do
   mode '0644'
 end
 
+template "#{node[:webserver][:root]}/conf/webbynode.conf" do
+  source "webbynode.conf.erb"
+  owner 'deploy'
+  group 'deployers'
+  mode '0644'
+end
+
 # --- Webbynode application management scripts ---
 
 template "/var/webbynode/config_app_db" do
