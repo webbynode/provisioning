@@ -17,13 +17,14 @@ nginx_path = "/tmp/nginx-#{node[:passenger][:nginx][:nginx_version]}"
 log "nginx_path = #{nginx_path}"
 
 remote_file "#{nginx_path}.tar.gz" do
+  action :create_if_missing
   cookbook "nginx"
   source "http://nginx.org/download/nginx-#{node[:passenger][:nginx][:nginx_version]}.tar.gz"
 end
 
 execute "extract nginx" do
   command "tar -C /tmp -xzf #{nginx_path}.tar.gz"
-  not_if { File.exists?("#{nginx_path}.tar.gz") }
+  creates nginx_path
 end
 
 # default options from Ubuntu 8.10
@@ -46,7 +47,7 @@ log "  ==> nginx -V 2>&1 | grep passenger-#{node[:passenger][:nginx][:nginx_vers
 execute "compile nginx with passenger" do
   command "passenger-install-nginx-module --auto --prefix=/usr --nginx-source-dir=#{nginx_path} --extra-configure-flags=\"#{compile_options}\""
   notifies :restart, resources(:service => "nginx")
-  not_if "nginx -V 2>&1 | grep passenger-#{node[:passenger][:nginx][:nginx_version]}"
+  not_if "nginx -V 2>&1 | grep passenger-#{node[:passenger][:nginx][:passenger_version]}"
 end
 
 template node[:nginx][:conf_dir] + "/passenger.conf" do
