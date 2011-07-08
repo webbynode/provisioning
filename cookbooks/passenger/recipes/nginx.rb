@@ -1,6 +1,6 @@
 require_recipe "nginx"
 
-gem_package "passenger-enterprise-server" do
+gem_package "passenger" do
   version node[:passenger][:nginx][:passenger_version]
 end
 
