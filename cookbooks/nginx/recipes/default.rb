@@ -9,6 +9,8 @@ package "libgeoip1"
 #   source "/home/system/pkg/debs/#{nginx_filename}"
 # end
 
+package "nginx"
+
 service "nginx" do
   supports :status => true, :restart => true, :reload => true
 end
