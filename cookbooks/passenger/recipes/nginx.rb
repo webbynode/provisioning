@@ -21,7 +21,7 @@ end
 
 execute "extract nginx" do
   command "tar -C /tmp -xzf #{nginx_path}.tar.gz"
-  not_if { File.exists?(nginx_path) }
+  not_if { File.exists?("#{nginx_path}.tar.gz") }
 end
 
 # default options from Ubuntu 8.10
@@ -38,6 +38,8 @@ compile_options = ["--conf-path=/etc/nginx/nginx.conf",
                    "--with-http_gzip_static_module",
                    "--with-http_geoip_module",
                    "--with-file-aio"].join(" ")
+
+log "  ==> nginx -V 2>&1 | grep passenger-#{node[:passenger][:nginx][:nginx_version]}"
 
 execute "compile nginx with passenger" do
   command "passenger-install-nginx-module --auto --prefix=/usr --nginx-source-dir=#{nginx_path} --extra-configure-flags=\"#{compile_options}\""
