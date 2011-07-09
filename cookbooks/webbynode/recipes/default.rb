@@ -20,7 +20,18 @@ end
 
 # include_recipe "#{node[:database][:server]}::server"
 # include_recipe "#{node[:webserver][:id]}"
-include_recipe "passenger::nginx"
+case node[:webserver][:id]
+when 'nginx'
+  include_recipe "passenger::nginx"
+  
+when 'apache'
+  include_recipe "passenger::default"
+
+end
+
+gem_package 'taps' do
+  action :install
+end
 
 case node[:database][:server]
 when 'mysql'
