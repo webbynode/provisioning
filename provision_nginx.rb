@@ -8,10 +8,10 @@
 	  "password": "tempra13"
 	},
 	"webserver": {
-	  "id": "apache",
-	  "name": "Apache",
-	  "initd": "apache",
-	  "root": "/etc/apache2"
+	  "id": "nginx",
+	  "name": "Nginx",
+	  "initd": "nginx",
+	  "root": "/etc/nginx"
 	},
 	"ssh": {
 	  "keys": [
@@ -21,5 +21,5 @@
 	"mysql": {
 	  "server_root_password": "tempra13"
 	},
-  "run_list": [ "recipe[webbynode::default]" ]
+  "run_list": [ "recipe[passenger::nginx]", "recipe[webbynode::default]" ]
 }
