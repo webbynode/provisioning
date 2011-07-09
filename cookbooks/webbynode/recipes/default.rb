@@ -4,6 +4,7 @@ package 'curl'
 package 'libcurl4-openssl-dev'
 package 'git-core'
 package 'python-software-properties'
+package 'libsqlite3-dev'
 
 # --- Add some PPAs ---
 
