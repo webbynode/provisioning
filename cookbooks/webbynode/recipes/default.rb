@@ -44,8 +44,6 @@ end
 
 @home = node[:deployer][:home]
 
-log ">>> HOME is: #{@home}"
-
 user 'deploy' do
   comment 'SSH based deployment user'
   home node[:deployer][:home]
