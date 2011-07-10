@@ -197,7 +197,7 @@ template "/var/webbynode/templates/rails/database.yml" do
 end
 
 template "#{node[:webserver][:root]}/conf.d/webbynode.conf" do
-  source "webbynode.conf.erb"
+  source "webbynode.conf.#{node[:webserver][:id]}.erb"
   owner 'deploy'
   group 'deployers'
   mode '0644'
